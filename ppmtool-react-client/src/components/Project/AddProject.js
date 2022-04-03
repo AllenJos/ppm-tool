@@ -1,6 +1,12 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { createProject } from "../../actions/projectActions";
+import { withRouter } from "../../withRouter";
+// import { useNavigate } from "react-router-dom";
+// import { withRouter } from "react-router-dom";
 
-export default class AddProject extends Component {
+class AddProject extends Component {
   constructor() {
     super();
 
@@ -10,6 +16,7 @@ export default class AddProject extends Component {
       description: "",
       start_date: "",
       end_date: "",
+      errors: {},
     };
 
     this.onChange = this.onChange.bind(this);
@@ -31,9 +38,20 @@ export default class AddProject extends Component {
     };
 
     console.log(newProject);
+    console.log(this.props.navigate);
+    this.props.createProject(newProject, this.props.navigate);
+  }
+
+  // componentWillReceiveProps(nextProps) {}
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.errors !== prevState.errors) {
+      return { errors: nextProps.errors };
+    } else return null;
   }
 
   render() {
+    const { errors } = this.state;
     return (
       <div>
         {
@@ -63,6 +81,7 @@ export default class AddProject extends Component {
                       value={this.state.projectName}
                       onChange={this.onChange}
                     />
+                    <p>{errors.projectName}</p>
                   </div>
                   <div className="form-group">
                     <input
@@ -73,6 +92,7 @@ export default class AddProject extends Component {
                       value={this.state.projectIdentifier}
                       onChange={this.onChange}
                     />
+                    <p>{errors.projectIdentifier}</p>
                   </div>
                   <div className="form-group">
                     <textarea
@@ -82,6 +102,7 @@ export default class AddProject extends Component {
                       value={this.state.description}
                       onChange={this.onChange}
                     />
+                    <p>{errors.description}</p>
                   </div>
                   <h6>Start Date</h6>
                   <div className="form-group">
@@ -117,3 +138,16 @@ export default class AddProject extends Component {
     );
   }
 }
+
+AddProject.propTypes = {
+  createProject: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  errors: state.errors,
+});
+
+export default withRouter(
+  connect(mapStateToProps, { createProject })(AddProject)
+);
